@@ -28,8 +28,8 @@ function scoreMove(state, startInd, endInd) {
 	// if enemy general
 	for (var i = 0; i < state.generals.length; i++) {
 		if (i !== state.playerIndex && state.generals[i] !== -1) {
-			var start_dist = util.distance(state, startInd, i)
-			var end_dist = util.distance(state, endInd, i)
+			var start_dist = util.distance(state, startInd, state.generals[i])
+			var end_dist = util.distance(state, endInd, state.generals[i])
 
       util.distance(state, endInd, i)
 			score -= Math.sqrt(end_dist)/10
