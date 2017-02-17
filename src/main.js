@@ -3,6 +3,7 @@ var socket = io('http://botws.generals.io');
 
 import * as util from './util.js'
 import config from './config.js'
+import * as m from './moves.js'
 
 let game = {
 	app: {setState: () => 0},
@@ -41,9 +42,6 @@ socket.on('connect', function() {
 	// socket.emit('join_team', 'team_name', user_id);
 });
 
-// Terrain Constants.
-// Any tile with a nonnegative value is owned by the player corresponding to its value.
-// For example, a tile with value 1 is owned by the player with playerIndex = 1.
 var TILE_EMPTY = -1
 var TILE_MOUNTAIN = -2
 var TILE_FOG = -3
@@ -71,174 +69,6 @@ var usernames = []
 
 var time = performance.now()
 
-Set.prototype.union = function(setB) {
-    var union = new Set(this);
-    for (var elem of setB) {
-        union.add(elem);
-    }
-    return union;
-}
-
-
-
-function listStartPos(state) {
-	let startInds = []
-
-	for (var i = 1; i < state.size; i++){
-		if (state.armies[i] > 1 && state.terrain[i] === state.playerIndex) {
-			startInds.push(i)
-		}
-	}
-	return startInds
-}
-
-function listEndInds(state, ind) {
-	let endInds = []
-	var options = [ind + state.width, ind + 1, ind - state.width, ind - 1]
-	for (var i = 0; i < 4; i++) {
-		if (isLegalandGood(state, ind, options[i]) === true) {
-			var endInd = [ind, options, 0, 0]
-			endInds.push(options[i])
-		}
-	}
-	return endInds
-}
-
-function isLegalandGood(state, startInd, endInd) {
-	//out of bounds
-	var h = state.height
-	var w = state.width
-	if (endInd < 0 || endInd > state.size) return false
-
-	//move tries to wrap board left<->right
-	if (startInd%w === 0 && endInd%w === w - 1) return false
-	if (endInd%w === 0 && startInd%w === w - 1) return false
-	//move wraps top<->bottom
-	if (endInd/w === 0 && startInd/w === h) return false
-	if (startInd/w === 0 && endInd/w === h) return false
-	if (state.terrain[endInd] === -2) {
-		return false
-	}
-
-	if (startInd === endInd) return false
-
-	if (state.cities.indexOf(endInd) !== -1) {
-		if (state.armies[startInd] < state.armies[endInd]+2) {
-			return false
-		}
-	}
-
-	if (state.terrain[endInd] !== state.playerIndex) {
-		if (state.armies[startInd] < state.armies[endInd]+2) {
-			return false
-		}
-	}
-	return true
-}
-
-function listNeighbors(state, ind) {
-	var w = state.width
-	var h = state.height
-	var neighbors = [ind+1, ind-1, ind+w, ind-w, ind+w+1, ind+w-1, ind-w+1, ind-w-1]
-	var final = []
-	for (var i = 0; i < 8; i++){
-		var endInd = neighbors[i]
-		// on board at all
-		if (endInd >= 0 && endInd < state.size + 1) {
-			if (ind%w === 0 && endInd%w === w - 1) {
-			} else if (endInd%w === 0 && ind%w === w - 1) {
-			//move wraps top<->bottom
-			}else if (endInd/w === 0 && ind/w === h){
-			}else if (ind/w === 0 && endInd/w === h){
-			}else {
-				final.push(endInd)
-			}
-		}
-	}
-	return final
-}
-//
-//is this correct? could it be messing things up?
-function distance(state, start, goal) {
-	var Srow = Math.floor(start / state.width);
-	var Scol = start % state.width;
-
-	var Erow = Math.floor(goal / state.width);
-	var Ecol = goal % state.width;
-
-	return Math.abs(Srow - Erow) + Math.abs(Scol - Ecol)
-}
-
-function scoreMove(state, startInd, endInd) {
-	var score = 0
-
-	// claiming territory
-	if (state.terrain[endInd] === TILE_EMPTY) score+=2
-	//enemy square
-	if (state.terrain[endInd] > -1 && state.terrain[endInd] !== state.playerIndex) {
-		//have more armies
-		if (state.armies[startInd] >= state.armies[endInd] + 2) {
-			if (state.cities.indexOf(endInd) !== -1) score+= 5
-			if (state.generals.indexOf[endInd]) score+= 200
-			score+= 3 + Math.sqrt(state.terrain[startInd])
-		}
-	}
-
-	// I'm not sure why this is making my people hide in the corner.
-	// if enemy general
-	for (var i = 0; i < state.generals.length; i++) {
-		if (i !== state.playerIndex && state.generals[i] !== -1) {
-			var start_dist = distance(state, startInd, i)
-			var end_dist = distance(state, endInd, i)
-			score -= Math.sqrt(end_dist)/10
-		}
-	}
-
-	var neighbors = listNeighbors(state, endInd)
-	for (var i = 0; i < neighbors.length; i++) {
-	//good if fog, better if fogstacle, best if another player
-		if (state.terrain[neighbors[i]] === TILE_FOG) score+= .3
-		if (state.terrain[neighbors[i]] === TILE_FOG_OBSTACLE) score+= .4
-		if (state.terrain[neighbors[i]] > -1 && state.terrain[neighbors[i]] !== state.playerIndex) score+= .5
-		//if neighbor with big fat generals
-		if (state.generals.indexOf[neighbors[i]]) score+=8
-	}
-
-	var sizeEnd = state.armies[endInd]
-	if (state.terrain[endInd] === state.playerIndex) score += Math.sqrt(sizeEnd)/15
-	score += Math.sqrt(state.armies[startInd])/10
-	score += Math.random()
-	return score
-}
-
-//return all movements as [startInd, endInd, score, is50]
-function bestMove(state, moves) {
-	if (moves.length === 0) return [-1,-1,-1,0]
-	var bestMoveInd = 0
-	var bestScore = 0
-	for (var i = 0; i < moves.length; i++) {
-		var score = moves[i][2]
-		if (score > bestScore) {
-			bestScore = score
-			bestMoveInd = i
-		}
-	}
-	return [moves[bestMoveInd][0], moves[bestMoveInd][1], bestScore, 0]
-}
-
-function getNextMoves(state) {
-	let startInds = listStartPos(state)
-	let endInds = []
-	let moves = []
-	for (var i = 0; i < startInds.length; i++){
-		endInds = listEndInds(state, startInds[i])
-		for (var j = 0; j < endInds.length; j++) {
-			moves.push([startInds[i], endInds[j], scoreMove(state, startInds[i], endInds[j]), 0])
-		}
-	}
-	return moves
-}
-
 //assumes move is valid
 //ignores uptick in turn number adding armies for now
 function virtualStateUpdate(state, move) {
@@ -261,27 +91,16 @@ function virtualStateUpdate(state, move) {
 }
 
 //given a state, returns move + top score
-//recursively!
-
-//state-> find all moves -> rank all moves
-//for each move -> new state
-//	-> find all moves -> rank all moves (time discount)
-//repeat. Highest ranking chain -> execute first move in chain
 function recurseSearch(state, depth, timeleft) {
 	var start = performance.now()
 	//find all moves
-	var moves = getNextMoves(state)
+	var moves = m.getNextMoves(state)
 	//if end of stack, just return highest scoring move
-	if (depth === 0) return bestMove(state, moves)
+	if (depth === 0) return m.bestMove(state, moves)
 	if (moves.length === 0) return [-1, -1, 0, 0]
 	moves.sort(function(a, b){
-		if (a[2] < b[2]) {
-	    return 1
-	  }
-	  if (a[2] > b[2]) {
-	    return -1
-	  }
-	  // a must be equal to b
+		if (a[2] < b[2]) return 1
+	  if (a[2] > b[2]) return -1
 	  return 0
 	})
 	var bestMoveInd = 0
@@ -298,13 +117,8 @@ function recurseSearch(state, depth, timeleft) {
 		}
 	}
 	moves.sort(function(a, b){
-		if (a[2] < b[2]) {
-	    return 1
-	  }
-	  if (a[2] > b[2]) {
-	    return -1
-	  }
-	  // a must be equal to b
+		if (a[2] < b[2]) return 1
+	  if (a[2] > b[2]) return -1
 	  return 0
 	})
 //	console.log(depth, moves.length, moves.slice(0,10))
@@ -382,7 +196,7 @@ function gameUpdate(state) {
 			console.log('random move')
 			// Make a random move.
 			// Pick a random tile.
-			var startpos = listStartPos(state)
+			var startpos = m.listStartPos(state)
 			var randpos = Math.floor(Math.random() * startpos.length);
 			var index = startpos[randpos]
 			// If we own this tile, make a random move starting from it.
@@ -417,7 +231,7 @@ function gameUpdate(state) {
 	}
 }
 
-//I want won and lost to be same function, but with different messages. Hmm.
+// gameWon and gameLost should be one function, but with the correct message.
 function gameWon() {
 	console.log('You won!!!')
 	console.log(s.generals)
