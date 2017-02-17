@@ -8,4 +8,5 @@ export default {
   'USER_ID': '[some string]',
   // You can only set the bot name once, so make it good!
   'USERNAME': '[Bot] [name here]',
+  'ROOM_NAME': '[some string]',
 }
