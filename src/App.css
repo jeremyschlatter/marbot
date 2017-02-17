@@ -1,0 +1,15 @@
+html {
+  box-sizing: border-box;
+}
+body, html, #root {
+  width: 100%;
+  height: 100%;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+.App {
+  text-align: center;
+}
