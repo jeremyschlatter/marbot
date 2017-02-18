@@ -80,6 +80,7 @@ class App extends Component {
       for (let x = 0; x < width; x++) {
         let isCity = cities.indexOf(x+y*width) !== -1
         let isGeneral = generals.indexOf(x+y*width) !== -1
+        const tile = terrain[x+y*width]
         var style = {}
         if (isGeneral) {
           style = {
@@ -88,18 +89,20 @@ class App extends Component {
         } else if (isCity) {
           style = {
             backgroundImage: `url(${city})`,
-            backgroundColor: 'gray',
           }
-        } else if (terrain[x+y*width] == TILE_FOG_OBSTACLE) {
+          if (tile == TILE_EMPTY) {
+            style.backgroundColor = 'gray'
+          }
+        } else if (tile == TILE_FOG_OBSTACLE) {
           style = {
             backgroundImage: `url(${obstacle})`,
             border: null,
           }
-        } else if (terrain[x+y*width] == TILE_FOG) {
+        } else if (tile == TILE_FOG) {
           style = {
             border: null,
           }
-        } else if (terrain[x+y*width] == TILE_MOUNTAIN) {
+        } else if (tile == TILE_MOUNTAIN) {
           style = {
             backgroundImage: `url(${mountain})`,
             backgroundColor: '#bbb',
