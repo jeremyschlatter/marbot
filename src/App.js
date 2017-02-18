@@ -3,6 +3,8 @@ import './App.css'
 
 const colors = ['orange','yellow','gray','white','red','blue','Chartreuse','purple','pink','Sienna','Aquamarine','SeaGreen']
 
+const Pad = ({height, width}) => <div style={{height: height, width: width}} />
+
 class App extends Component {
   constructor() {
     super()
@@ -14,12 +16,23 @@ class App extends Component {
       scores: [],
       cities: [],
       usernames: [],
-      generals: []
+      generals: [],
+      numberCells: true,
     }
   }
   render() {
     let cells = []
-    let {width, height, armies, terrain, scores, cities, usernames, generals} = this.state
+    let {
+      width,
+      height,
+      armies,
+      terrain,
+      scores,
+      cities,
+      usernames,
+      generals,
+      numberCells,
+    } = this.state
     let scorebox = []
     for (let p = 0; p < scores.length; p++){
       let ind = scores[p].i
@@ -68,8 +81,20 @@ class App extends Component {
           lineHeight: `${boxSize}px`,
           backgroundColor: colors[4 + terrain[x+y*width]],
         }}>
+          {numberCells && (
+            <span style={{
+              position: 'absolute',
+              top: 2,
+              right: 2,
+              height: '12px',
+              lineHeight: '12px',
+              fontSize: '9px',
+            }}>
+              {x+y*width}
+            </span>
+          )}
           <span style={{zIndex: 1}}>
-            {armies[x+y*width] !== 0 ? armies[x+y*width] : x+y*width}
+            {armies[x+y*width] !== 0 && armies[x+y*width]}
           </span>
           {isGeneral &&
             <span style={{
@@ -102,6 +127,17 @@ class App extends Component {
         </div>
         <div style={{display: 'inline-block'}}>
           {scorebox}
+          <Pad height={20} />
+          <label>
+            Show cell numbers
+            <input
+              type='checkbox'
+              checked={numberCells}
+              onChange={() => this.setState({
+                numberCells: !numberCells
+              })}
+            />
+          </label>
         </div>
       </div>
     )

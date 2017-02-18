@@ -9,13 +9,7 @@ let app = ReactDOM.render(
   document.getElementById('root')
 )
 
-let state = {
-  width: 0,
-  height: 0,
-  armies: [],
-  terrain: [],
-  scores: [],
-}
+let state = {}
 game.onUpdate = newState => {
   state = newState
   app.setState(state)
@@ -29,5 +23,6 @@ if (module.hot) {
       <NextApp />,
       root
     )
+    app.setState(state)
   })
 }
