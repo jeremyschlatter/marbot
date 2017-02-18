@@ -154,10 +154,10 @@ function updateState(data) {
 		s.armies = s.map.slice(2, s.size + 2)
 	} else {
 		//only update generals, cities, terrain if the value is going from -1 -> actual knowledge
-		for (var i = 0; i < data.generals.length; i++) { // [-1, 161]
+		for (let i = 0; i < data.generals.length; i++) { // [-1, 161]
 			if (data.generals[i] !== -1) s.generals[i] = data.generals[i]
 		}
-		for (var c of data.cities) {
+		for (let c of data.cities) {
 			if (s.cities.indexOf(c) !== -1) s.cities.push(c)
 		}
 
@@ -172,15 +172,7 @@ function updateState(data) {
 socket.on('game_update', function(data) {
 	updateState(data)
 
-	var width = s.width
-	var height = s.height
-	var armies = s.armies
-	var terrain = s.terrain
-	var cities = s.cities
-	var scores = s.scores
-	var generals = s.generals
-
-	game.onUpdate({width, height, armies, terrain, scores, cities, usernames, generals})
+	game.onUpdate(s)
 	gameUpdate(s)
 })
 
