@@ -158,7 +158,7 @@ function updateState(data) {
 			if (data.generals[i] !== -1) s.generals[i] = data.generals[i]
 		}
 		for (let c of data.cities) {
-			if (s.cities.indexOf(c) !== -1) s.cities.push(c)
+			if (s.cities.indexOf(c) === -1) s.cities.push(c)
 		}
 
 		for (var i = 0; i < s.size; i++) {
