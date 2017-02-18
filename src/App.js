@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import './App.css'
+import crown from './crown.png'
+import city from './city.png'
 
 const colors = ['orange','yellow','gray','white','red','blue','Chartreuse','purple','pink','Sienna','Aquamarine','SeaGreen']
 
@@ -69,7 +71,14 @@ class App extends Component {
       let row = []
       for (let x = 0; x < width; x++) {
         let isCity = cities.indexOf(x+y*width) !== -1
+
         let isGeneral = generals.indexOf(x+y*width) !== -1
+        let image = null;
+        if (isGeneral) {
+          image = `url(${crown})`
+        } else if (isCity) {
+          image = `url(${city})`
+        }
         row.push(<div style={{
           width: boxSize,
           height: boxSize,
@@ -80,6 +89,10 @@ class App extends Component {
           verticalAlign: 'middle',
           lineHeight: `${boxSize}px`,
           backgroundColor: colors[4 + terrain[x+y*width]],
+          backgroundImage: image,
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: 'contain',
         }}>
           {numberCells && (
             <span style={{
@@ -88,26 +101,16 @@ class App extends Component {
               right: 2,
               height: '12px',
               lineHeight: '12px',
-              fontSize: '9px',
+              fontSize: '8px',
+              color: 'white',
+              fontWeight: 100,
             }}>
               {x+y*width}
             </span>
           )}
-          <span style={{zIndex: 1}}>
+          <span style={{zIndex: 1, color: 'white', fontWeight: 100, fontSize: '13px'}}>
             {armies[x+y*width] !== 0 && armies[x+y*width]}
           </span>
-          {isGeneral &&
-            <span style={{
-              width: '100%',
-              position: 'absolute',
-              top: -12,
-              fontSize: '12px',
-              left: 0,
-              color: 'white',
-            }}>
-             	👑
-            </span>
-          }
         </div>)
       }
       cells.push(<div style={{height: boxSize}}>
