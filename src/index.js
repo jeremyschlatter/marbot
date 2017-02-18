@@ -4,17 +4,25 @@ import App from './App'
 import './index.css'
 import {game} from './main.js'
 
-const app = ReactDOM.render(
+let app = ReactDOM.render(
   <App />,
   document.getElementById('root')
 )
 
-game.app = app
+let state = {}
+game.onUpdate = newState => {
+  state = newState
+  app.setState(state)
+}
+app.setState(state)
 
-app.setState({
-  width: 0,
-  height: 0,
-  armies: [],
-  terrain: [],
-  scores: []
-})
+if (module.hot) {
+  module.hot.accept('./App', () => {
+    const NextApp = require('./App').default
+    app = ReactDOM.render(
+      <NextApp />,
+      root
+    )
+    app.setState(state)
+  })
+}

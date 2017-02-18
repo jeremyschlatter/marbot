@@ -6,7 +6,7 @@ import config from './config.js'
 import * as m from './moves.js'
 
 let game = {
-	app: {setState: () => 0},
+	onUpdate: () => 0,
 }
 
 socket.on('disconnect', function() {
@@ -25,7 +25,7 @@ socket.on('connect', function() {
 
 	// Join a custom game and force start immediately.
 	// Custom games are a great way to test your bot while you develop it because you can play against your bot!
-	//socket.emit('join_private', config.ROOM_NAME, user_id);
+	socket.emit('join_private', config.ROOM_NAME, user_id);
 	socket.emit('set_force_start', config.ROOM_NAME, true);
 	console.log('Joined custom game at http://bot.generals.io/games/' + encodeURIComponent(config.ROOM_NAME));
 
@@ -33,7 +33,7 @@ socket.on('connect', function() {
 	// Here are some examples of how you'd do that:
 
 	// Join the 1v1 queue.
-	socket.emit('join_1v1', user_id);
+	// socket.emit('join_1v1', user_id);
 
 	// Join the FFA queue.
 	// socket.emit('play', user_id);
@@ -154,11 +154,11 @@ function updateState(data) {
 		s.armies = s.map.slice(2, s.size + 2)
 	} else {
 		//only update generals, cities, terrain if the value is going from -1 -> actual knowledge
-		for (var i = 0; i < data.generals.length; i++) { // [-1, 161]
+		for (let i = 0; i < data.generals.length; i++) { // [-1, 161]
 			if (data.generals[i] !== -1) s.generals[i] = data.generals[i]
 		}
-		for (var c of data.cities) {
-			if (s.cities.indexOf(c) !== -1) s.cities.push(c)
+		for (let c of data.cities) {
+			if (s.cities.indexOf(c) === -1) s.cities.push(c)
 		}
 
 		for (var i = 0; i < s.size; i++) {
@@ -172,15 +172,7 @@ function updateState(data) {
 socket.on('game_update', function(data) {
 	updateState(data)
 
-	var width = s.width
-	var height = s.height
-	var armies = s.armies
-	var terrain = s.terrain
-	var cities = s.cities
-	var scores = s.scores
-	var generals = s.generals
-
-	game.app.setState({width, height, armies, terrain, scores, cities, usernames, generals})
+	game.onUpdate(s)
 	gameUpdate(s)
 })
 

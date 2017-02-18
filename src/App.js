@@ -1,7 +1,19 @@
+import Radium from 'radium'
 import React, { Component } from 'react'
 import './App.css'
+import crown from './crown.png'
+import city from './city.png'
+import obstacle from './obstacle.png'
+import mountain from './mountain.png'
 
-const colors = ['orange','yellow','gray','white','red','blue','Chartreuse','purple','pink','Sienna','Aquamarine','SeaGreen']
+const colors = ['rgba(56,56,56,1)','rgba(56,56,56,1)','gray','#DCDCDC','red','blue','Chartreuse','purple','pink','Sienna','Aquamarine','SeaGreen']
+
+const Pad = ({height, width}) => <div style={{height: height, width: width}} />
+
+const TILE_EMPTY = -1
+const TILE_MOUNTAIN = -2
+const TILE_FOG = -3
+const TILE_FOG_OBSTACLE = -4 // Cities and Mountains show up as Obstacles in the fog of war.
 
 class App extends Component {
   constructor() {
@@ -14,12 +26,23 @@ class App extends Component {
       scores: [],
       cities: [],
       usernames: [],
-      generals: []
+      generals: [],
+      numberCells: false,
     }
   }
   render() {
     let cells = []
-    let {width, height, armies, terrain, scores, cities, usernames, generals} = this.state
+    let {
+      width,
+      height,
+      armies,
+      terrain,
+      scores,
+      cities,
+      usernames,
+      generals,
+      numberCells,
+    } = this.state
     let scorebox = []
     for (let p = 0; p < scores.length; p++){
       let ind = scores[p].i
@@ -57,32 +80,65 @@ class App extends Component {
       for (let x = 0; x < width; x++) {
         let isCity = cities.indexOf(x+y*width) !== -1
         let isGeneral = generals.indexOf(x+y*width) !== -1
-        row.push(<div style={{
+        const tile = terrain[x+y*width]
+        var style = {}
+        if (isGeneral) {
+          style = {
+            backgroundImage: `url(${crown})`,
+          }
+        } else if (isCity) {
+          style = {
+            backgroundImage: `url(${city})`,
+          }
+          if (tile == TILE_EMPTY) {
+            style.backgroundColor = 'gray'
+          }
+        } else if (tile == TILE_FOG_OBSTACLE) {
+          style = {
+            backgroundImage: `url(${obstacle})`,
+            border: null,
+          }
+        } else if (tile == TILE_FOG) {
+          style = {
+            border: null,
+          }
+        } else if (tile == TILE_MOUNTAIN) {
+          style = {
+            backgroundImage: `url(${mountain})`,
+            backgroundColor: '#bbb',
+          }
+        }
+        row.push(<div style={[{
           width: boxSize,
           height: boxSize,
           position: 'relative',
-          border: isCity ? '3px solid gray' : '1px solid black',
+          border: '1px solid black',
           display: 'inline-block',
           textAlign: 'center',
           verticalAlign: 'middle',
           lineHeight: `${boxSize}px`,
           backgroundColor: colors[4 + terrain[x+y*width]],
-        }}>
-          <span style={{zIndex: 1}}>
-            {armies[x+y*width] !== 0 ? armies[x+y*width] : x+y*width}
-          </span>
-          {isGeneral &&
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: 'contain',
+        }, style]}>
+          {numberCells && (
             <span style={{
-              width: '100%',
               position: 'absolute',
-              top: -12,
-              fontSize: '12px',
-              left: 0,
+              top: 2,
+              right: 2,
+              height: '12px',
+              lineHeight: '12px',
+              fontSize: '8px',
               color: 'white',
+              fontWeight: 100,
             }}>
-             	👑
+              {x+y*width}
             </span>
-          }
+          )}
+          <span style={{zIndex: 1, color: 'white', fontWeight: 100, fontSize: '13px'}}>
+            {armies[x+y*width] !== 0 && armies[x+y*width]}
+          </span>
         </div>)
       }
       cells.push(<div style={{height: boxSize}}>
@@ -102,10 +158,21 @@ class App extends Component {
         </div>
         <div style={{display: 'inline-block'}}>
           {scorebox}
+          <Pad height={20} />
+          <label>
+            Show cell numbers
+            <input
+              type='checkbox'
+              checked={numberCells}
+              onChange={() => this.setState({
+                numberCells: !numberCells
+              })}
+            />
+          </label>
         </div>
       </div>
     )
   }
 }
 
-export default App;
+export default Radium(App)

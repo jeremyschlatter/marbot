@@ -6,8 +6,10 @@
     "react-scripts": "0.8.5"
   },
   "dependencies": {
+    "radium": "^0.18.1",
     "react": "^15.4.2",
-    "react-dom": "^15.4.2"
+    "react-dom": "^15.4.2",
+    "socket.io-client": "^1.7.3"
   },
   "scripts": {
     "start": "react-scripts start",
