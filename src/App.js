@@ -1,3 +1,4 @@
+import Radium from 'radium'
 import React, { Component } from 'react'
 import './App.css'
 import crown from './crown.png'
@@ -79,35 +80,45 @@ class App extends Component {
       for (let x = 0; x < width; x++) {
         let isCity = cities.indexOf(x+y*width) !== -1
         let isGeneral = generals.indexOf(x+y*width) !== -1
-        let isFog = false
-        let image = null
+        var style = {}
         if (isGeneral) {
-          image = `url(${crown})`
+          style = {
+            backgroundImage: `url(${crown})`,
+          }
         } else if (isCity) {
-          image = `url(${city})`
+          style = {
+            backgroundImage: `url(${city})`,
+            backgroundColor: 'gray',
+          }
         } else if (terrain[x+y*width] == TILE_FOG_OBSTACLE) {
-          image = `url(${obstacle})`
-          isFog = true
+          style = {
+            backgroundImage: `url(${obstacle})`,
+            border: null,
+          }
         } else if (terrain[x+y*width] == TILE_FOG) {
-          isFog = true
+          style = {
+            border: null,
+          }
         } else if (terrain[x+y*width] == TILE_MOUNTAIN) {
-          image = `url(${mountain})`
+          style = {
+            backgroundImage: `url(${mountain})`,
+            backgroundColor: '#bbb',
+          }
         }
-        row.push(<div style={{
+        row.push(<div style={[{
           width: boxSize,
           height: boxSize,
           position: 'relative',
-          border: isFog ? null : '1px solid black',
+          border: '1px solid black',
           display: 'inline-block',
           textAlign: 'center',
           verticalAlign: 'middle',
           lineHeight: `${boxSize}px`,
           backgroundColor: colors[4 + terrain[x+y*width]],
-          backgroundImage: image,
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           backgroundSize: 'contain',
-        }}>
+        }, style]}>
           {numberCells && (
             <span style={{
               position: 'absolute',
@@ -161,4 +172,4 @@ class App extends Component {
   }
 }
 
-export default App;
+export default Radium(App)
