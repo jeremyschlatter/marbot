@@ -2,10 +2,17 @@ import React, { Component } from 'react'
 import './App.css'
 import crown from './crown.png'
 import city from './city.png'
+import obstacle from './obstacle.png'
+import mountain from './mountain.png'
 
-const colors = ['orange','yellow','gray','white','red','blue','Chartreuse','purple','pink','Sienna','Aquamarine','SeaGreen']
+const colors = ['rgba(56,56,56,1)','rgba(56,56,56,1)','gray','#DCDCDC','red','blue','Chartreuse','purple','pink','Sienna','Aquamarine','SeaGreen']
 
 const Pad = ({height, width}) => <div style={{height: height, width: width}} />
+
+const TILE_EMPTY = -1
+const TILE_MOUNTAIN = -2
+const TILE_FOG = -3
+const TILE_FOG_OBSTACLE = -4 // Cities and Mountains show up as Obstacles in the fog of war.
 
 class App extends Component {
   constructor() {
@@ -19,7 +26,7 @@ class App extends Component {
       cities: [],
       usernames: [],
       generals: [],
-      numberCells: true,
+      numberCells: false,
     }
   }
   render() {
@@ -71,19 +78,26 @@ class App extends Component {
       let row = []
       for (let x = 0; x < width; x++) {
         let isCity = cities.indexOf(x+y*width) !== -1
-
         let isGeneral = generals.indexOf(x+y*width) !== -1
-        let image = null;
+        let isFog = false
+        let image = null
         if (isGeneral) {
           image = `url(${crown})`
         } else if (isCity) {
           image = `url(${city})`
+        } else if (terrain[x+y*width] == TILE_FOG_OBSTACLE) {
+          image = `url(${obstacle})`
+          isFog = true
+        } else if (terrain[x+y*width] == TILE_FOG) {
+          isFog = true
+        } else if (terrain[x+y*width] == TILE_MOUNTAIN) {
+          image = `url(${mountain})`
         }
         row.push(<div style={{
           width: boxSize,
           height: boxSize,
           position: 'relative',
-          border: isCity ? '3px solid gray' : '1px solid black',
+          border: isFog ? null : '1px solid black',
           display: 'inline-block',
           textAlign: 'center',
           verticalAlign: 'middle',
