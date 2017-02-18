@@ -39,11 +39,11 @@ function scoreMove(state, startInd, endInd) {
 	var neighbors = util.neighbors(state, endInd)
 	for (var i = 0; i < neighbors.length; i++) {
 	//good if fog, better if fogstacle, best if another player
-		if (state.terrain[neighbors[i]] === TILE_FOG) score+= .3
-		if (state.terrain[neighbors[i]] === TILE_FOG_OBSTACLE) score+= .4
-		if (state.terrain[neighbors[i]] > -1 && state.terrain[neighbors[i]] !== state.playerIndex) score+= .5
+		//if (state.terrain[neighbors[i]] === TILE_FOG) score+= .3
+		//if (state.terrain[neighbors[i]] === TILE_FOG_OBSTACLE) score+= .4
+		//if (state.terrain[neighbors[i]] > -1 && state.terrain[neighbors[i]] !== state.playerIndex) score+= .5
 		//if neighbor with big fat generals
-		if (state.generals.indexOf[neighbors[i]]) score+=8
+		//if (state.generals.indexOf[neighbors[i]]) score+=8
 	}
   var sizeEnd = state.armies[endInd]
   if (state.terrain[endInd] === state.playerIndex) score += Math.sqrt(sizeEnd)/15

@@ -51,6 +51,7 @@ var DISCOUNT = .7
 var RECURSE_LEVEL = 2
 // Game data.
 var s = {
+	usernames: [],
 	playerIndex: 0,
 	cities: [],
 	generals: [],
@@ -65,7 +66,6 @@ var s = {
 var lastStart = -1
 var lastEnd = -1
 var replay_url = ""
-var usernames = []
 
 var time = performance.now()
 
@@ -128,7 +128,7 @@ function recurseSearch(state, depth, timeleft) {
 socket.on('game_start', function(data) {
 	// Get ready to start playing the game.
 	s.playerIndex = data.playerIndex;
-	usernames = data.usernames
+	s.usernames = data.usernames
 	replay_url = 'http://bot.generals.io/replays/' + encodeURIComponent(data.replay_id);
 	console.log('Game starting! The replay will be available after the game at ' + replay_url);
 	time = performance.now()
