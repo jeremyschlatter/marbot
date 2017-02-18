@@ -6,7 +6,7 @@ import config from './config.js'
 import * as m from './moves.js'
 
 let game = {
-	app: {setState: () => 0},
+	onUpdate: () => 0,
 }
 
 socket.on('disconnect', function() {
@@ -25,7 +25,7 @@ socket.on('connect', function() {
 
 	// Join a custom game and force start immediately.
 	// Custom games are a great way to test your bot while you develop it because you can play against your bot!
-	//socket.emit('join_private', config.ROOM_NAME, user_id);
+	socket.emit('join_private', config.ROOM_NAME, user_id);
 	socket.emit('set_force_start', config.ROOM_NAME, true);
 	console.log('Joined custom game at http://bot.generals.io/games/' + encodeURIComponent(config.ROOM_NAME));
 
@@ -33,7 +33,7 @@ socket.on('connect', function() {
 	// Here are some examples of how you'd do that:
 
 	// Join the 1v1 queue.
-	socket.emit('join_1v1', user_id);
+	// socket.emit('join_1v1', user_id);
 
 	// Join the FFA queue.
 	// socket.emit('play', user_id);
@@ -180,7 +180,7 @@ socket.on('game_update', function(data) {
 	var scores = s.scores
 	var generals = s.generals
 
-	game.app.setState({width, height, armies, terrain, scores, cities, usernames, generals})
+	game.onUpdate({width, height, armies, terrain, scores, cities, usernames, generals})
 	gameUpdate(s)
 })
 
